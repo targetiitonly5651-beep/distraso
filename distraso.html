@@ -1,0 +1,1611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>distraso | Student Focus Timer</title>
+
+  <style>
+    :root {
+      --pink: #ff7eb6;
+      --pink-dark: #ff4f9a;
+      --blue: #8ec5ff;
+      --blue-deep: #5fa8ff;
+      --blue-soft: #d9ecff;
+      --white: #ffffff;
+      --text: #30303a;
+      --muted: #676779;
+      --glass: rgba(255, 255, 255, 0.70);
+      --border: rgba(255, 255, 255, 0.78);
+      --shadow: 0 22px 75px rgba(255, 105, 180, 0.20);
+      --danger: #ff4f7b;
+      --success: #29a36a;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Poppins", "Segoe UI", Arial, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      overflow-x: hidden;
+      color: var(--text);
+      background: linear-gradient(120deg, #ffffff, #ffd6e8, #d9ecff, #fff4fa, #ffffff);
+      background-size: 500% 500%;
+      animation: bgMove 14s ease infinite;
+    }
+
+    body::before,
+    body::after {
+      content: "";
+      position: fixed;
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      filter: blur(12px);
+      opacity: 0.35;
+      z-index: -1;
+      animation: bubbleFloat 10s ease-in-out infinite;
+    }
+
+    body::before {
+      background: #ffc7e1;
+      top: 8%;
+      left: 5%;
+    }
+
+    body::after {
+      background: #bfe0ff;
+      bottom: 8%;
+      right: 5%;
+      animation-delay: 2s;
+    }
+
+    @keyframes bgMove {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    @keyframes bubbleFloat {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-35px) scale(1.08); }
+    }
+
+    .screen {
+      display: none;
+      min-height: 100vh;
+      padding: 0;
+      align-items: stretch;
+      justify-content: stretch;
+      text-align: center;
+    }
+
+    .active {
+      display: flex;
+    }
+
+    .glass-card {
+      width: 100%;
+      min-height: 100vh;
+      padding: clamp(24px, 5vw, 58px);
+      border-radius: 0;
+      background: rgba(255, 255, 255, 0.42);
+      box-shadow: none;
+      backdrop-filter: blur(18px);
+      border: none;
+      animation: none;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    @keyframes cardFloat {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-7px); }
+    }
+
+    .intro-screen {
+      flex-direction: column;
+    }
+
+    .logo-d {
+      font-family: "Brush Script MT", cursive;
+      font-size: 160px;
+      color: var(--pink);
+      line-height: 0.9;
+      text-shadow: 0 0 35px rgba(255, 126, 182, 0.55);
+      animation: logoMove 2.9s ease forwards;
+    }
+
+    @keyframes logoMove {
+      0% { opacity: 0; transform: scale(0.35) translateY(70px) rotate(-14deg); }
+      50% { opacity: 1; transform: scale(1.18) translateY(-4px) rotate(5deg); }
+      100% { opacity: 1; transform: scale(1) translateY(-12px) rotate(0deg); }
+    }
+
+    .brand-name {
+      font-size: 44px;
+      letter-spacing: 5px;
+      color: #444;
+      margin-top: -10px;
+      animation: fadeIn 2.1s ease forwards;
+      font-weight: 800;
+    }
+
+    .tagline {
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 17px;
+      animation: fadeIn 2.4s ease forwards;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(18px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h1 {
+      font-size: clamp(30px, 5vw, 46px);
+      margin-bottom: 10px;
+    }
+
+    h2 {
+      font-size: clamp(24px, 4vw, 34px);
+      margin-bottom: 12px;
+    }
+
+    p {
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .small-text {
+      font-size: 13px;
+      color: #777;
+      margin-top: 10px;
+    }
+
+    .warning-text {
+      margin-top: 12px;
+      color: #8a5a00;
+      background: rgba(255, 241, 190, 0.65);
+      padding: 12px 14px;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 210, 88, 0.5);
+      text-align: left;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    button {
+      border: none;
+      cursor: pointer;
+      border-radius: 999px;
+      padding: 13px 22px;
+      font-size: 15px;
+      font-weight: 800;
+      transition: 0.25s ease;
+    }
+
+    button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 25px rgba(255, 126, 182, 0.25);
+    }
+
+    button:active { transform: translateY(0); }
+
+    .primary-btn {
+      background: linear-gradient(135deg, var(--pink), var(--blue));
+      color: white;
+    }
+
+    .secondary-btn {
+      background: rgba(255,255,255,0.9);
+      color: var(--pink-dark);
+      border: 1px solid rgba(255, 126, 182, 0.45);
+    }
+
+    .danger-btn {
+      background: #fff0f6;
+      color: var(--pink-dark);
+      border: 1px solid #ffc2dd;
+    }
+
+    .ghost-btn {
+      background: transparent;
+      color: #555;
+      border: 1px solid rgba(255,255,255,0.95);
+    }
+
+    input, select {
+      width: 100%;
+      padding: 14px 16px;
+      border-radius: 18px;
+      border: 1px solid rgba(255, 126, 182, 0.35);
+      outline: none;
+      margin-top: 12px;
+      font-size: 15px;
+      background: rgba(255, 255, 255, 0.82);
+      color: var(--text);
+    }
+
+    input:focus, select:focus {
+      border-color: var(--pink);
+      box-shadow: 0 0 0 4px rgba(255, 126, 182, 0.16);
+    }
+
+    .top-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 22px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.72);
+      border: 1px solid rgba(255,255,255,0.9);
+      color: #555;
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .auth-tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 24px 0 16px;
+    }
+
+    .auth-tab {
+      background: rgba(255,255,255,0.78);
+      color: #555;
+      border: 1px solid rgba(255, 126, 182, 0.25);
+    }
+
+    .auth-tab.active-tab {
+      background: linear-gradient(135deg, var(--pink), var(--blue));
+      color: #fff;
+    }
+
+    .auth-form {
+      display: none;
+      text-align: left;
+    }
+
+    .auth-form.active-form {
+      display: block;
+    }
+
+    .auth-form label {
+      display: block;
+      margin-top: 14px;
+      color: #555;
+      font-weight: 800;
+      font-size: 14px;
+    }
+
+    .auth-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
+
+    .auth-actions button {
+      flex: 1;
+      min-width: 140px;
+    }
+
+    .message-box {
+      display: none;
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.72);
+      color: #555;
+      text-align: left;
+      font-weight: 650;
+    }
+
+    .question-number {
+      font-size: 14px;
+      color: var(--pink-dark);
+      font-weight: 900;
+      margin-bottom: 10px;
+    }
+
+    .progress-wrap {
+      width: 100%;
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.7);
+      overflow: hidden;
+      margin: 14px 0 22px;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 14.2%;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--pink), var(--blue));
+      transition: width 0.3s ease;
+    }
+
+    .options {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .option {
+      padding: 15px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.78);
+      border: 1px solid rgba(255, 126, 182, 0.25);
+      color: #555;
+      cursor: pointer;
+      transition: 0.25s ease;
+      font-weight: 800;
+    }
+
+    .option:hover,
+    .option.selected {
+      background: linear-gradient(135deg, var(--pink), var(--blue));
+      color: white;
+      transform: translateY(-4px);
+    }
+
+    .question-actions {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 28px;
+      flex-wrap: wrap;
+    }
+
+    .question-actions button {
+      flex: 1;
+      min-width: 130px;
+    }
+
+    .profile-grid,
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(185px, 1fr));
+      gap: 16px;
+      margin-top: 24px;
+      text-align: left;
+    }
+
+    .profile-box,
+    .stat-box {
+      background: rgba(255, 255, 255, 0.74);
+      padding: 18px;
+      border-radius: 22px;
+      border: 1px solid rgba(255, 126, 182, 0.22);
+      min-height: 84px;
+    }
+
+    .profile-box strong,
+    .stat-box strong {
+      color: var(--pink-dark);
+      display: block;
+      margin-bottom: 6px;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .stat-box span {
+      font-size: 24px;
+      font-weight: 900;
+      color: #333;
+    }
+
+    .dashboard-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 26px;
+    }
+
+    .time-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 14px;
+      margin: 24px 0;
+    }
+
+    .time-option {
+      background: rgba(255,255,255,0.88);
+      border: 1px solid rgba(255, 126, 182, 0.3);
+      color: #555;
+    }
+
+    .time-option.selected {
+      background: linear-gradient(135deg, var(--pink), var(--blue));
+      color: white;
+    }
+
+    .custom-time {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .timer-area {
+      display: grid;
+      place-items: center;
+      margin: 22px auto;
+    }
+
+    .circle-timer {
+      position: relative;
+      width: min(78vw, 360px);
+      height: min(78vw, 360px);
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background:
+        conic-gradient(var(--pink) 0deg, var(--blue) 0deg, rgba(255,255,255,0.62) 0deg 360deg);
+      box-shadow:
+        0 25px 60px rgba(255, 126, 182, 0.28),
+        inset 0 0 30px rgba(255, 255, 255, 0.35);
+      transition: background 0.35s linear;
+      animation: breatheCircle 4s ease-in-out infinite;
+    }
+
+    @keyframes breatheCircle {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.025); }
+    }
+
+    .circle-timer::before {
+      content: "";
+      position: absolute;
+      inset: 18px;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 30% 20%, rgba(255,255,255,0.96), rgba(255,255,255,0.72)),
+        linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,245,250,0.72));
+      box-shadow:
+        inset 0 0 35px rgba(255,255,255,0.9),
+        inset 0 -18px 35px rgba(255,126,182,0.08);
+    }
+
+    .circle-timer::after {
+      content: "";
+      position: absolute;
+      inset: 34px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 126, 182, 0.18);
+      pointer-events: none;
+    }
+
+    .timer-content {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      padding: 22px;
+    }
+
+    .timer-display {
+      font-size: clamp(38px, 11vw, 68px);
+      font-weight: 950;
+      color: #30303a;
+      letter-spacing: 1px;
+      text-shadow: 0 10px 28px rgba(255, 126, 182, 0.20);
+      line-height: 1;
+    }
+
+    .timer-label {
+      margin-top: 12px;
+      color: var(--pink-dark);
+      font-weight: 900;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-size: 12px;
+    }
+
+    .timer-percent {
+      margin-top: 8px;
+      font-size: 14px;
+      color: #686878;
+      font-weight: 800;
+    }
+
+    .timer-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .focus-note {
+      background: rgba(255, 255, 255, 0.76);
+      padding: 16px;
+      border-radius: 22px;
+      margin: 18px 0;
+      color: #555;
+      border: 1px solid rgba(255, 126, 182, 0.2);
+      font-weight: 700;
+    }
+
+    .alarm-text {
+      font-size: 20px;
+      color: var(--pink-dark);
+      font-weight: 950;
+      margin-top: 16px;
+      display: none;
+    }
+
+    .mini-dashboard {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+      gap: 12px;
+      margin: 18px 0;
+      text-align: left;
+    }
+
+    .mini-item {
+      background: rgba(255,255,255,0.65);
+      border: 1px solid rgba(255,255,255,0.8);
+      padding: 13px;
+      border-radius: 18px;
+    }
+
+    .mini-item strong {
+      display: block;
+      color: var(--pink-dark);
+      margin-bottom: 4px;
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+
+    .quote-box {
+      margin-top: 22px;
+      padding: 16px;
+      background: rgba(255,255,255,0.7);
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,0.88);
+      font-weight: 700;
+      color: #555;
+    }
+
+    .admin-box {
+      text-align: left;
+      margin-top: 18px;
+      display: none;
+      background: rgba(255,255,255,0.68);
+      border: 1px solid rgba(255,255,255,0.8);
+      border-radius: 22px;
+      padding: 16px;
+    }
+
+    .admin-box textarea {
+      width: 100%;
+      min-height: 120px;
+      margin-top: 10px;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 126, 182, 0.25);
+      padding: 12px;
+      resize: vertical;
+      background: rgba(255,255,255,0.82);
+    }
+
+
+    .glass-card > h1,
+    .glass-card > h2,
+    .glass-card > p,
+    .glass-card > .top-row,
+    .glass-card > .auth-tabs,
+    .glass-card > .auth-form,
+    .glass-card > .message-box,
+    .glass-card > .question-number,
+    .glass-card > .progress-wrap,
+    .glass-card > #answerArea,
+    .glass-card > .question-actions,
+    .glass-card > .stats-grid,
+    .glass-card > .profile-grid,
+    .glass-card > .quote-box,
+    .glass-card > .dashboard-actions,
+    .glass-card > .admin-box,
+    .glass-card > .time-grid,
+    .glass-card > .custom-time,
+    .glass-card > .mini-dashboard,
+    .glass-card > .timer-area,
+    .glass-card > .timer-buttons,
+    .glass-card > .focus-note,
+    .glass-card > .alarm-text,
+    .glass-card > .small-text {
+      width: min(100%, 1050px);
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .glass-card > .top-row {
+      position: absolute;
+      top: 22px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .dashboardScreenSpacer {
+      height: 40px;
+    }
+
+    @media (max-width: 560px) {
+      .screen { padding: 0; }
+      .glass-card { padding: 24px 18px; border-radius: 0; }
+      .logo-d { font-size: 126px; }
+      .brand-name { font-size: 34px; }
+      .custom-time { grid-template-columns: 1fr; }
+      .top-row { justify-content: center; }
+      button { width: 100%; }
+      .timer-buttons button, .dashboard-actions button, .question-actions button, .auth-actions button { width: auto; }
+      .circle-timer { width: min(84vw, 330px); height: min(84vw, 330px); }
+      .circle-timer::before { inset: 14px; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <section id="introScreen" class="screen active intro-screen">
+    <div>
+      <div class="logo-d">D</div>
+      <div class="brand-name">distraso</div>
+      <p class="tagline">A soft study watch for distracted students.</p>
+    </div>
+  </section>
+
+  <section id="authScreen" class="screen">
+    <div class="glass-card">
+      <h1>distraso</h1>
+      <p>Create your student account or login to continue your focus journey.</p>
+
+      <div class="auth-tabs">
+        <button id="signupTab" class="auth-tab active-tab" onclick="switchAuth('signup')">Create Account</button>
+        <button id="loginTab" class="auth-tab" onclick="switchAuth('login')">Login</button>
+      </div>
+
+      <div id="signupForm" class="auth-form active-form">
+        <label for="signupEmail">Gmail / Email</label>
+        <input type="email" id="signupEmail" placeholder="example@gmail.com" />
+
+        <label for="signupPassword">Set Password</label>
+        <input type="password" id="signupPassword" placeholder="Minimum 6 characters" />
+
+        <label for="signupConfirm">Confirm Password</label>
+        <input type="password" id="signupConfirm" placeholder="Repeat password" />
+
+        <div class="auth-actions">
+          <button class="primary-btn" onclick="createAccount()">Submit & Continue</button>
+        </div>
+
+        <div class="warning-text">
+          Prototype note: this single HTML version saves account data only in this browser using localStorage. For real users, use Firebase/Supabase so emails come to your owner dashboard safely.
+        </div>
+      </div>
+
+      <div id="loginForm" class="auth-form">
+        <label for="loginEmail">Gmail / Email</label>
+        <input type="email" id="loginEmail" placeholder="example@gmail.com" />
+
+        <label for="loginPassword">Password</label>
+        <input type="password" id="loginPassword" placeholder="Enter password" />
+
+        <div class="auth-actions">
+          <button class="primary-btn" onclick="loginAccount()">Login</button>
+        </div>
+      </div>
+
+      <div id="authMessage" class="message-box"></div>
+    </div>
+  </section>
+
+  <section id="questionScreen" class="screen">
+    <div class="glass-card">
+      <div class="top-row">
+        <span class="pill">✨ Student setup</span>
+        <span class="pill" id="setupEmailPill">Account</span>
+      </div>
+
+      <div class="question-number" id="questionNumber">Question 1 of 7</div>
+      <div class="progress-wrap">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+      <h2 id="questionTitle">What is your name?</h2>
+      <div id="answerArea"></div>
+
+      <div class="question-actions">
+        <button class="secondary-btn" onclick="previousQuestion()">Back</button>
+        <button class="primary-btn" onclick="nextQuestion()">Next</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="dashboardScreen" class="screen">
+    <div class="glass-card">
+      <div class="top-row">
+        <span class="pill">🌸 distraso dashboard</span>
+        <span class="pill" id="todayDate">Today</span>
+        <button class="ghost-btn" onclick="logout()">Logout</button>
+      </div>
+
+      <h1 id="welcomeText">Welcome 👋</h1>
+      <p id="dashboardLine">Your personal focus space is ready.</p>
+
+      <div class="stats-grid">
+        <div class="stat-box">
+          <strong>Sessions Completed</strong>
+          <span id="statSessions">0</span>
+        </div>
+        <div class="stat-box">
+          <strong>Total Study Time</strong>
+          <span id="statStudyTime">0m</span>
+        </div>
+        <div class="stat-box">
+          <strong>Current Streak</strong>
+          <span id="statStreak">0</span>
+        </div>
+        <div class="stat-box">
+          <strong>Distractions Resisted</strong>
+          <span id="statDistractions">0</span>
+        </div>
+      </div>
+
+      <div class="profile-grid">
+        <div class="profile-box">
+          <strong>Email</strong>
+          <span id="profileEmail">Not set</span>
+        </div>
+        <div class="profile-box">
+          <strong>Exam / Class</strong>
+          <span id="profileExam">Not set</span>
+        </div>
+        <div class="profile-box">
+          <strong>Main Distraction</strong>
+          <span id="profileDistraction">Not set</span>
+        </div>
+        <div class="profile-box">
+          <strong>Study Problem</strong>
+          <span id="profileProblem">Not set</span>
+        </div>
+        <div class="profile-box">
+          <strong>Hobby</strong>
+          <span id="profileHobby">Not set</span>
+        </div>
+        <div class="profile-box">
+          <strong>Best Study Time</strong>
+          <span id="profileStudyTime">Not set</span>
+        </div>
+      </div>
+
+      <div class="quote-box" id="quoteBox">
+        Today’s mission: start small, finish clean.
+      </div>
+
+      <div class="dashboard-actions">
+        <button class="primary-btn" onclick="showTimerSetup()">Open Study Watch</button>
+        <button class="secondary-btn" onclick="restartSetup()">Edit Student Setup</button>
+        <button class="secondary-btn" onclick="toggleAdminBox()">Show Saved Emails</button>
+        <button class="danger-btn" onclick="resetMyData()">Reset My Data</button>
+      </div>
+
+      <div class="admin-box" id="adminBox">
+        <strong>Saved emails on this browser</strong>
+        <p class="small-text">In the real website, this should be in your Firebase/Supabase dashboard, not only here.</p>
+        <textarea id="emailList" readonly></textarea>
+        <div class="dashboard-actions">
+          <button class="secondary-btn" onclick="copyEmails()">Copy Emails</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="timerSetupScreen" class="screen">
+    <div class="glass-card">
+      <div class="top-row">
+        <span class="pill">⏱️ Study Watch</span>
+        <span class="pill" id="setupEnemy">Enemy: Distraction</span>
+      </div>
+
+      <h1>How long will you study?</h1>
+      <p>Choose a quick mode or create your own focus session.</p>
+
+      <div class="time-grid">
+        <button class="time-option" onclick="selectTime(10, this)">10 min</button>
+        <button class="time-option" onclick="selectTime(15, this)">15 min</button>
+        <button class="time-option selected" onclick="selectTime(25, this)">25 min</button>
+        <button class="time-option" onclick="selectTime(45, this)">45 min</button>
+        <button class="time-option" onclick="selectTime(60, this)">1 hour</button>
+        <button class="time-option" onclick="selectTime(90, this)">90 min</button>
+      </div>
+
+      <p>Custom time:</p>
+      <div class="custom-time">
+        <input type="number" id="customHours" placeholder="Hours" min="0" />
+        <input type="number" id="customMinutes" placeholder="Minutes" min="0" />
+      </div>
+
+      <div class="question-actions">
+        <button class="secondary-btn" onclick="showDashboard()">Back</button>
+        <button class="primary-btn" onclick="startStudyWatch()">Start Study Watch</button>
+      </div>
+
+      <p class="small-text">Tip: start with 10 or 15 minutes when your brain feels lazy. Winning small is still winning.</p>
+    </div>
+  </section>
+
+  <section id="timerScreen" class="screen">
+    <div class="glass-card">
+      <div class="top-row">
+        <span class="pill">🔥 Focus Mode</span>
+        <span class="pill" id="sessionLength">25 min session</span>
+      </div>
+
+      <h1>Study Watch Active</h1>
+      <p id="enemyText">Your distraction enemy is outside. Don’t open the door.</p>
+
+      <div class="mini-dashboard">
+        <div class="mini-item">
+          <strong>Mode</strong>
+          <span id="timerMode">Focus</span>
+        </div>
+        <div class="mini-item">
+          <strong>Status</strong>
+          <span id="timerStatus">Ready</span>
+        </div>
+        <div class="mini-item">
+          <strong>Enemy</strong>
+          <span id="timerEnemy">Distraction</span>
+        </div>
+      </div>
+
+      <div class="timer-area">
+        <div class="circle-timer" id="circleTimer">
+          <div class="timer-content">
+            <div class="timer-display" id="timerDisplay">25:00</div>
+            <div class="timer-label" id="timerLabel">Ready</div>
+            <div class="timer-percent" id="timerPercent">0% filled</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="timer-buttons">
+        <button class="primary-btn" onclick="startTimer()">Start</button>
+        <button class="secondary-btn" onclick="pauseTimer()">Pause</button>
+        <button class="secondary-btn" onclick="resumeTimer()">Resume</button>
+        <button class="danger-btn" onclick="resetTimer()">Reset</button>
+      </div>
+
+      <button class="danger-btn" onclick="distractionHelp()">I’m getting distracted</button>
+
+      <div class="focus-note" id="focusNote">
+        Stay focused. Your progress circle will fill as you study.
+      </div>
+
+      <div class="alarm-text" id="alarmText">
+        Session complete 🎉
+      </div>
+
+      <div class="dashboard-actions">
+        <button class="secondary-btn" onclick="finishEarly()">Finish Early</button>
+        <button class="primary-btn" onclick="showDashboard()">Go to Dashboard</button>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    const screens = {
+      intro: document.getElementById("introScreen"),
+      auth: document.getElementById("authScreen"),
+      question: document.getElementById("questionScreen"),
+      dashboard: document.getElementById("dashboardScreen"),
+      timerSetup: document.getElementById("timerSetupScreen"),
+      timer: document.getElementById("timerScreen")
+    };
+
+    const defaultStats = {
+      sessionsCompleted: 0,
+      totalStudyMinutes: 0,
+      streak: 0,
+      distractionsResisted: 0,
+      lastStudyDate: "",
+      biggestDistractionClicks: {}
+    };
+
+    let currentUserEmail = localStorage.getItem("distrasoCurrentUser") || "";
+    let currentQuestion = 0;
+    let userAnswers = {};
+    let stats = {...defaultStats};
+
+    function showScreen(screenName) {
+      Object.values(screens).forEach(screen => screen.classList.remove("active"));
+      screens[screenName].classList.add("active");
+    }
+
+    setTimeout(() => {
+      if (currentUserEmail) {
+        loadUserData();
+        if (isProfileComplete()) showDashboard();
+        else {
+          showScreen("question");
+          loadQuestion();
+        }
+      } else {
+        showScreen("auth");
+      }
+    }, 3200);
+
+    function switchAuth(mode) {
+      document.getElementById("signupTab").classList.toggle("active-tab", mode === "signup");
+      document.getElementById("loginTab").classList.toggle("active-tab", mode === "login");
+      document.getElementById("signupForm").classList.toggle("active-form", mode === "signup");
+      document.getElementById("loginForm").classList.toggle("active-form", mode === "login");
+      showAuthMessage("");
+    }
+
+    function normalizeEmail(email) {
+      return String(email || "").trim().toLowerCase();
+    }
+
+    function validEmail(email) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
+
+    async function hashPassword(password) {
+      const encoder = new TextEncoder();
+      const data = encoder.encode(password);
+      const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(byte => byte.toString(16).padStart(2, "0")).join("");
+    }
+
+    function getUsers() {
+      return JSON.parse(localStorage.getItem("distrasoUsers") || "{}");
+    }
+
+    function saveUsers(users) {
+      localStorage.setItem("distrasoUsers", JSON.stringify(users));
+    }
+
+    function userKey(email) {
+      return "distrasoData_" + email;
+    }
+
+    function showAuthMessage(message) {
+      const box = document.getElementById("authMessage");
+      if (!message) {
+        box.style.display = "none";
+        box.textContent = "";
+      } else {
+        box.style.display = "block";
+        box.textContent = message;
+      }
+    }
+
+    async function createAccount() {
+      const email = normalizeEmail(document.getElementById("signupEmail").value);
+      const password = document.getElementById("signupPassword").value;
+      const confirm = document.getElementById("signupConfirm").value;
+
+      if (!validEmail(email)) {
+        showAuthMessage("Please enter a valid Gmail/email.");
+        return;
+      }
+
+      if (password.length < 6) {
+        showAuthMessage("Password must be at least 6 characters.");
+        return;
+      }
+
+      if (password !== confirm) {
+        showAuthMessage("Passwords do not match.");
+        return;
+      }
+
+      const users = getUsers();
+
+      if (users[email]) {
+        showAuthMessage("Account already exists. Please login.");
+        switchAuth("login");
+        document.getElementById("loginEmail").value = email;
+        return;
+      }
+
+      const passwordHash = await hashPassword(password);
+
+      users[email] = {
+        email,
+        passwordHash,
+        createdAt: new Date().toISOString()
+      };
+
+      saveUsers(users);
+
+      currentUserEmail = email;
+      localStorage.setItem("distrasoCurrentUser", email);
+
+      userAnswers = { email };
+      stats = {...defaultStats};
+      saveUserData();
+
+      document.getElementById("setupEmailPill").textContent = email;
+      currentQuestion = 0;
+      showScreen("question");
+      loadQuestion();
+    }
+
+    async function loginAccount() {
+      const email = normalizeEmail(document.getElementById("loginEmail").value);
+      const password = document.getElementById("loginPassword").value;
+      const users = getUsers();
+
+      if (!users[email]) {
+        showAuthMessage("No account found with this email.");
+        return;
+      }
+
+      const passwordHash = await hashPassword(password);
+
+      if (users[email].passwordHash !== passwordHash) {
+        showAuthMessage("Wrong password. Try again.");
+        return;
+      }
+
+      currentUserEmail = email;
+      localStorage.setItem("distrasoCurrentUser", email);
+      loadUserData();
+
+      if (isProfileComplete()) showDashboard();
+      else {
+        currentQuestion = 0;
+        showScreen("question");
+        loadQuestion();
+      }
+    }
+
+    function logout() {
+      clearInterval(timerInterval);
+      isRunning = false;
+      localStorage.removeItem("distrasoCurrentUser");
+      currentUserEmail = "";
+      userAnswers = {};
+      stats = {...defaultStats};
+      showScreen("auth");
+    }
+
+    function saveUserData() {
+      if (!currentUserEmail) return;
+      localStorage.setItem(userKey(currentUserEmail), JSON.stringify({
+        profile: userAnswers,
+        stats
+      }));
+    }
+
+    function loadUserData() {
+      if (!currentUserEmail) return;
+
+      const raw = localStorage.getItem(userKey(currentUserEmail));
+      if (raw) {
+        const data = JSON.parse(raw);
+        userAnswers = data.profile || { email: currentUserEmail };
+        stats = data.stats || {...defaultStats};
+      } else {
+        userAnswers = { email: currentUserEmail };
+        stats = {...defaultStats};
+        saveUserData();
+      }
+    }
+
+    function isProfileComplete() {
+      return userAnswers.name && userAnswers.exam && userAnswers.distraction && userAnswers.problem && userAnswers.hobby && userAnswers.studyTime && userAnswers.focusDuration;
+    }
+
+    const questions = [
+      {
+        key: "name",
+        title: "What is your name?",
+        type: "input",
+        placeholder: "Enter your name"
+      },
+      {
+        key: "exam",
+        title: "Which class or exam are you preparing for?",
+        type: "options",
+        options: ["School Exams", "ICSE", "CBSE", "SAT", "CLAT", "CUET", "Other"]
+      },
+      {
+        key: "distraction",
+        title: "What distracts you the most?",
+        type: "options",
+        options: ["YouTube", "Instagram", "Gaming", "WhatsApp", "Sleepiness", "Overthinking", "Random Scrolling", "Other"]
+      },
+      {
+        key: "problem",
+        title: "What is your biggest study problem?",
+        type: "options",
+        options: ["I can't start", "I lose focus", "I procrastinate", "I forget fast", "I get bored", "Phone addiction"]
+      },
+      {
+        key: "hobby",
+        title: "What is your favourite hobby?",
+        type: "options",
+        options: ["Gaming", "Music", "Sports", "Editing Videos", "Reading", "Movies", "Other"]
+      },
+      {
+        key: "studyTime",
+        title: "When do you usually study best?",
+        type: "options",
+        options: ["Morning", "Afternoon", "Evening", "Night"]
+      },
+      {
+        key: "focusDuration",
+        title: "How long can you focus normally?",
+        type: "options",
+        options: ["10 minutes", "20 minutes", "30 minutes", "1 hour", "More than 1 hour"]
+      }
+    ];
+
+    const questionNumber = document.getElementById("questionNumber");
+    const questionTitle = document.getElementById("questionTitle");
+    const answerArea = document.getElementById("answerArea");
+    const progressBar = document.getElementById("progressBar");
+
+    function loadQuestion() {
+      const question = questions[currentQuestion];
+
+      document.getElementById("setupEmailPill").textContent = currentUserEmail || "Account";
+      questionNumber.textContent = `Question ${currentQuestion + 1} of ${questions.length}`;
+      questionTitle.textContent = question.title;
+      progressBar.style.width = `${((currentQuestion + 1) / questions.length) * 100}%`;
+      answerArea.innerHTML = "";
+
+      if (question.type === "input") {
+        const input = document.createElement("input");
+        input.type = "text";
+        input.placeholder = question.placeholder;
+        input.value = userAnswers[question.key] || "";
+        input.oninput = function () {
+          userAnswers[question.key] = input.value;
+        };
+        input.onkeydown = function(event) {
+          if (event.key === "Enter") nextQuestion();
+        };
+        answerArea.appendChild(input);
+        setTimeout(() => input.focus(), 80);
+      }
+
+      if (question.type === "options") {
+        const optionBox = document.createElement("div");
+        optionBox.className = "options";
+
+        question.options.forEach(option => {
+          const optionDiv = document.createElement("div");
+          optionDiv.className = "option";
+          optionDiv.textContent = option;
+
+          if (userAnswers[question.key] === option) {
+            optionDiv.classList.add("selected");
+          }
+
+          optionDiv.onclick = function () {
+            userAnswers[question.key] = option;
+            document.querySelectorAll(".option").forEach(item => item.classList.remove("selected"));
+            optionDiv.classList.add("selected");
+          };
+
+          optionBox.appendChild(optionDiv);
+        });
+
+        answerArea.appendChild(optionBox);
+      }
+    }
+
+    function nextQuestion() {
+      const question = questions[currentQuestion];
+
+      if (!userAnswers[question.key] || String(userAnswers[question.key]).trim() === "") {
+        alert("Please answer this question first.");
+        return;
+      }
+
+      if (currentQuestion < questions.length - 1) {
+        currentQuestion++;
+        loadQuestion();
+      } else {
+        userAnswers.email = currentUserEmail;
+        saveUserData();
+        showDashboard();
+      }
+    }
+
+    function previousQuestion() {
+      if (currentQuestion > 0) {
+        currentQuestion--;
+        loadQuestion();
+      }
+    }
+
+    function restartSetup() {
+      currentQuestion = 0;
+      showScreen("question");
+      loadQuestion();
+    }
+
+    function showDashboard() {
+      loadUserData();
+
+      document.getElementById("todayDate").textContent = new Date().toLocaleDateString(undefined, {
+        weekday: "short",
+        month: "short",
+        day: "numeric"
+      });
+
+      document.getElementById("welcomeText").textContent = `Welcome, ${userAnswers.name || "Student"} 👋`;
+      document.getElementById("dashboardLine").textContent =
+        `Your mission: beat ${userAnswers.distraction || "distraction"} and complete one clean session.`;
+
+      document.getElementById("profileEmail").textContent = currentUserEmail || "Not set";
+      document.getElementById("profileExam").textContent = userAnswers.exam || "Not set";
+      document.getElementById("profileDistraction").textContent = userAnswers.distraction || "Not set";
+      document.getElementById("profileProblem").textContent = userAnswers.problem || "Not set";
+      document.getElementById("profileHobby").textContent = userAnswers.hobby || "Not set";
+      document.getElementById("profileStudyTime").textContent = userAnswers.studyTime || "Not set";
+
+      document.getElementById("statSessions").textContent = stats.sessionsCompleted;
+      document.getElementById("statStudyTime").textContent = formatStudyTime(stats.totalStudyMinutes);
+      document.getElementById("statStreak").textContent = `${stats.streak} day${stats.streak === 1 ? "" : "s"}`;
+      document.getElementById("statDistractions").textContent = stats.distractionsResisted;
+
+      document.getElementById("quoteBox").textContent = dailyQuote();
+
+      showScreen("dashboard");
+    }
+
+    function formatStudyTime(minutes) {
+      if (minutes < 60) return `${minutes}m`;
+      const h = Math.floor(minutes / 60);
+      const m = minutes % 60;
+      return m === 0 ? `${h}h` : `${h}h ${m}m`;
+    }
+
+    function dailyQuote() {
+      const quotes = [
+        "Today’s mission: start small, finish clean.",
+        "You don’t need perfect focus. You need one honest session.",
+        "Beat the first 10 minutes. After that, momentum helps you.",
+        "Your future self is quietly watching this session.",
+        "Distraction gives quick fun. Focus gives real confidence.",
+        "A small session done is better than a perfect plan ignored.",
+        "No drama today. Just start, stay, and finish."
+      ];
+      const index = new Date().getDate() % quotes.length;
+      return quotes[index];
+    }
+
+    let selectedMinutes = 25;
+
+    function showTimerSetup() {
+      document.getElementById("setupEnemy").textContent = `Enemy: ${userAnswers.distraction || "Distraction"}`;
+      showScreen("timerSetup");
+    }
+
+    function selectTime(minutes, button) {
+      selectedMinutes = minutes;
+      document.querySelectorAll(".time-option").forEach(btn => btn.classList.remove("selected"));
+      button.classList.add("selected");
+      document.getElementById("customHours").value = "";
+      document.getElementById("customMinutes").value = "";
+    }
+
+    function startStudyWatch() {
+      const customHours = parseInt(document.getElementById("customHours").value) || 0;
+      const customMinutes = parseInt(document.getElementById("customMinutes").value) || 0;
+
+      if (customHours > 0 || customMinutes > 0) {
+        selectedMinutes = customHours * 60 + customMinutes;
+      }
+
+      if (selectedMinutes <= 0) {
+        alert("Please choose a valid study time.");
+        return;
+      }
+
+      totalSeconds = selectedMinutes * 60;
+      remainingSeconds = totalSeconds;
+      updateTimerDisplay();
+      updateCircleProgress();
+
+      document.getElementById("sessionLength").textContent = `${selectedMinutes} min session`;
+      document.getElementById("timerMode").textContent = selectedMinutes >= 45 ? "Deep Study" : "Focus";
+      document.getElementById("timerStatus").textContent = "Ready";
+      document.getElementById("timerEnemy").textContent = userAnswers.distraction || "Distraction";
+      document.getElementById("timerLabel").textContent = "Ready";
+
+      document.getElementById("enemyText").textContent =
+        `${userAnswers.distraction || "Distraction"} is your enemy today. Stay stronger than it.`;
+
+      document.getElementById("focusNote").textContent =
+        `Stay focused, ${userAnswers.name || "student"}. The circle fills as you study.`;
+
+      document.getElementById("alarmText").style.display = "none";
+      showScreen("timer");
+    }
+
+    let totalSeconds = 25 * 60;
+    let remainingSeconds = totalSeconds;
+    let timerInterval = null;
+    let isRunning = false;
+    let sessionCompletedAlready = false;
+
+    const timerDisplay = document.getElementById("timerDisplay");
+    const circleTimer = document.getElementById("circleTimer");
+    const timerPercent = document.getElementById("timerPercent");
+
+    function updateTimerDisplay() {
+      const hours = Math.floor(remainingSeconds / 3600);
+      const minutes = Math.floor((remainingSeconds % 3600) / 60);
+      const seconds = remainingSeconds % 60;
+
+      if (hours > 0) {
+        timerDisplay.textContent =
+          `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+      } else {
+        timerDisplay.textContent =
+          `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+      }
+    }
+
+    function updateCircleProgress() {
+      const progress = totalSeconds === 0 ? 0 : ((totalSeconds - remainingSeconds) / totalSeconds);
+      const degrees = Math.round(progress * 360);
+      const percent = Math.round(progress * 100);
+
+      circleTimer.style.background =
+        `conic-gradient(var(--pink) 0deg, var(--blue) ${degrees}deg, rgba(255,255,255,0.62) ${degrees}deg 360deg)`;
+
+      timerPercent.textContent = `${percent}% filled`;
+    }
+
+    function startTimer() {
+      if (isRunning) return;
+
+      unlockAudio();
+      isRunning = true;
+      sessionCompletedAlready = false;
+      document.getElementById("timerStatus").textContent = "Running";
+      document.getElementById("timerLabel").textContent = "Studying";
+      document.getElementById("focusNote").textContent = "Good. Now protect this session.";
+
+      timerInterval = setInterval(() => {
+        if (remainingSeconds > 0) {
+          remainingSeconds--;
+          updateTimerDisplay();
+          updateCircleProgress();
+        } else {
+          completeTimer();
+        }
+      }, 1000);
+    }
+
+    function pauseTimer() {
+      clearInterval(timerInterval);
+      isRunning = false;
+      document.getElementById("timerStatus").textContent = "Paused";
+      document.getElementById("timerLabel").textContent = "Paused";
+      document.getElementById("focusNote").textContent = "Paused. Don’t disappear too long.";
+    }
+
+    function resumeTimer() {
+      if (!isRunning && remainingSeconds > 0) {
+        startTimer();
+        document.getElementById("timerStatus").textContent = "Running";
+        document.getElementById("timerLabel").textContent = "Studying";
+        document.getElementById("focusNote").textContent = "Good comeback. Continue the session.";
+      }
+    }
+
+    function resetTimer() {
+      clearInterval(timerInterval);
+      isRunning = false;
+      remainingSeconds = totalSeconds;
+      updateTimerDisplay();
+      updateCircleProgress();
+      document.getElementById("timerStatus").textContent = "Ready";
+      document.getElementById("timerLabel").textContent = "Ready";
+      document.getElementById("alarmText").style.display = "none";
+      document.getElementById("focusNote").textContent = "Timer reset. Start again when ready.";
+    }
+
+    function completeTimer() {
+      if (sessionCompletedAlready) return;
+      sessionCompletedAlready = true;
+
+      clearInterval(timerInterval);
+      isRunning = false;
+      remainingSeconds = 0;
+      updateTimerDisplay();
+      updateCircleProgress();
+
+      document.getElementById("timerStatus").textContent = "Completed";
+      document.getElementById("timerLabel").textContent = "Complete";
+      document.getElementById("alarmText").style.display = "block";
+      document.getElementById("alarmText").textContent = "Session complete 🎉 Alarm activated!";
+
+      document.getElementById("focusNote").textContent =
+        `Great job, ${userAnswers.name || "student"}. You defeated ${userAnswers.distraction || "your distraction"} today.`;
+
+      updateStatsAfterCompletion(selectedMinutes);
+      playAlarm();
+    }
+
+    function finishEarly() {
+      const studiedSeconds = totalSeconds - remainingSeconds;
+      const studiedMinutes = Math.max(1, Math.floor(studiedSeconds / 60));
+
+      if (studiedSeconds < 60) {
+        alert("Study at least 1 minute before finishing early.");
+        return;
+      }
+
+      if (confirm(`Finish early and save ${studiedMinutes} minute(s) of study?`)) {
+        clearInterval(timerInterval);
+        isRunning = false;
+        updateStatsAfterCompletion(studiedMinutes);
+        document.getElementById("timerStatus").textContent = "Saved";
+        document.getElementById("timerLabel").textContent = "Saved";
+        document.getElementById("focusNote").textContent = `Saved ${studiedMinutes} minute(s). Small progress still counts.`;
+      }
+    }
+
+    function updateStatsAfterCompletion(minutesStudied) {
+      loadUserData();
+      const today = getDateKey();
+      const yesterday = getYesterdayKey();
+
+      stats.sessionsCompleted += 1;
+      stats.totalStudyMinutes += minutesStudied;
+
+      if (stats.lastStudyDate !== today) {
+        if (stats.lastStudyDate === yesterday) stats.streak += 1;
+        else stats.streak = 1;
+
+        stats.lastStudyDate = today;
+      }
+
+      saveUserData();
+    }
+
+    function getDateKey() {
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+    }
+
+    function getYesterdayKey() {
+      const d = new Date();
+      d.setDate(d.getDate() - 1);
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+    }
+
+    const helpMessages = [
+      "Stop. Take one deep breath. Continue for just 5 more minutes.",
+      "Don’t quit the full session. Win the next 60 seconds first.",
+      "Your brain wants escape. You want results. Choose results.",
+      "Keep the phone away. You only need to survive this round.",
+      "Small focus now. Big confidence later.",
+      "Distraction is loud for a moment. Regret is louder later.",
+      "Touch nothing else. Read the next line. Solve the next question.",
+      "This urge will pass. Stay inside the circle."
+    ];
+
+    function distractionHelp() {
+      loadUserData();
+      stats.distractionsResisted += 1;
+
+      const enemy = userAnswers.distraction || "Distraction";
+      stats.biggestDistractionClicks[enemy] = (stats.biggestDistractionClicks[enemy] || 0) + 1;
+      saveUserData();
+
+      const randomMessage = helpMessages[Math.floor(Math.random() * helpMessages.length)];
+      document.getElementById("focusNote").textContent = randomMessage;
+      document.getElementById("timerStatus").textContent = "Resisted";
+    }
+
+    let audioContext = null;
+
+    function unlockAudio() {
+      try {
+        if (!audioContext) {
+          audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioContext.state === "suspended") audioContext.resume();
+      } catch (error) {
+        console.log("Audio unavailable:", error);
+      }
+    }
+
+    function playAlarm() {
+      try {
+        unlockAudio();
+        let beepCount = 0;
+
+        const beepInterval = setInterval(() => {
+          const oscillator = audioContext.createOscillator();
+          const gainNode = audioContext.createGain();
+
+          oscillator.connect(gainNode);
+          gainNode.connect(audioContext.destination);
+
+          oscillator.type = "sine";
+          oscillator.frequency.value = beepCount % 2 === 0 ? 850 : 1050;
+          gainNode.gain.value = 0.25;
+
+          oscillator.start();
+
+          setTimeout(() => oscillator.stop(), 280);
+
+          beepCount++;
+
+          if (beepCount >= 12) clearInterval(beepInterval);
+        }, 430);
+      } catch (error) {
+        alert("Session complete!");
+      }
+    }
+
+    function resetMyData() {
+      if (confirm("Reset your profile and stats? Your login will remain.")) {
+        userAnswers = { email: currentUserEmail };
+        stats = {...defaultStats};
+        saveUserData();
+        currentQuestion = 0;
+        showScreen("question");
+        loadQuestion();
+      }
+    }
+
+    function toggleAdminBox() {
+      const box = document.getElementById("adminBox");
+      const list = document.getElementById("emailList");
+      const users = getUsers();
+      const emails = Object.keys(users);
+
+      list.value = emails.length ? emails.join("\n") : "No saved emails on this browser.";
+      box.style.display = box.style.display === "block" ? "none" : "block";
+    }
+
+    async function copyEmails() {
+      const text = document.getElementById("emailList").value;
+      try {
+        await navigator.clipboard.writeText(text);
+        alert("Emails copied.");
+      } catch {
+        alert("Copy failed. Select the text and copy manually.");
+      }
+    }
+
+    window.onload = function () {
+      currentUserEmail = localStorage.getItem("distrasoCurrentUser") || "";
+      if (currentUserEmail) loadUserData();
+    };
+  </script>
+</body>
+</html>
